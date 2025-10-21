@@ -1,0 +1,21 @@
+name = "med-record-worker"
+main = "src/worker/index.js"
+compatibility_date = "2024-01-01"
+workers_dev = true
+
+[env.production]
+name = "med-record-worker-prod"
+route = "api.medrecord.space/*"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "YOUR_KV_NAMESPACE_ID"
+preview_id = "YOUR_PREVIEW_KV_NAMESPACE_ID"
+
+[[kv_namespaces]]
+binding = "TOKENS"
+id = "YOUR_TOKENS_KV_NAMESPACE_ID"
+preview_id = "YOUR_PREVIEW_TOKENS_KV_NAMESPACE_ID"
+
+[vars]
+DETA_SPACE_URL = "https://your-app.deta.space"

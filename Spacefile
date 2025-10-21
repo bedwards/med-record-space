@@ -1,0 +1,13 @@
+v: 0
+micros:
+  - name: med-record-backend
+    src: ./src/deta
+    engine: python3.9
+    primary: true
+    run: uvicorn main:app
+    presets:
+      env:
+        - name: ENVIRONMENT
+          default: production
+    public_routes:
+      - "/health"

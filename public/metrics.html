@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MedRecord Space - Metrics</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f9fafb;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: #2563eb;
+      margin-bottom: 2rem;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .metric-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .metric-value {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #2563eb;
+    }
+
+    .metric-label {
+      color: #6b7280;
+      margin-top: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .last-updated {
+      color: #9ca3af;
+      font-size: 0.875rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>System Metrics</h1>
+    
+    <div class="metrics-grid" id="metrics">
+      <!-- Metrics loaded dynamically -->
+    </div>
+
+    <p class="last-updated" id="last-updated">Loading...</p>
+  </div>
+
+  <script>
+    async function loadMetrics() {
+      try {
+        const response = await fetch('https://api.medrecord.space/metrics');
+        const data = await response.json();
+
+        const metricsContainer = document.getElementById('metrics');
+        metricsContainer.innerHTML = `
+          <div class="metric-card">
+            <div class="metric-value">${data.activeUsers || 0}</div>
+            <div class="metric-label">Active Users</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">${data.syncCount || 0}</div>
+            <div class="metric-label">Total Syncs</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">${data.storageUsed || '0 MB'}</div>
+            <div class="metric-label">Storage Used</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">${data.uptime || '100%'}</div>
+            <div class="metric-label">Uptime</div>
+          </div>
+        `;
+
+        document.getElementById('last-updated').textContent = 
+          `Last updated: ${new Date().toLocaleString()}`;
+      } catch (error) {
+        console.error('Failed to load metrics:', error);
+        document.getElementById('metrics').innerHTML = 
+          '<p>Failed to load metrics. Please try again later.</p>';
+      }
+    }
+
+    loadMetrics();
+    setInterval(loadMetrics, 60000); // Refresh every minute
+  </script>
+</body>
+</html>

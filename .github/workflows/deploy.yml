@@ -1,0 +1,59 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build
+        run: npm run build
+      
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+
+  deploy-worker:
+    runs-on: ubuntu-latest
+    needs: deploy-frontend
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  deploy-deta:
+    runs-on: ubuntu-latest
+    needs: deploy-worker
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Deploy to Deta Space
+        run: |
+          curl -fsSL https://get.deta.dev/space-cli.sh | sh
+          export PATH="$HOME/.detaspace/bin:$PATH"
+          cd src/deta
+          space push --project ${{ secrets.DETA_PROJECT_ID }}
+        env:
+          DETA_ACCESS_TOKEN: ${{ secrets.DETA_ACCESS_TOKEN }}
